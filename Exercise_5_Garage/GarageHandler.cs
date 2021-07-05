@@ -8,9 +8,9 @@ namespace Exercise_5_Garage
 {
     class GarageHandler
     {
-        public GarageHandler()
+        public void Input()
         {
-            
+
         }
     }
 }

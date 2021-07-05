@@ -17,11 +17,11 @@ namespace Exercise_5_Garage
 
         public void AddVehicle()
         {
-            vehicles.Add(new Vehicle());
+            Vehicle.Add();
         }
         public void RemoveVehicle()
         {
-            vehicles.Remove("ABC123");
+            Vehicle.Remove(vehicles,"ABC123");
         }
     }
 }

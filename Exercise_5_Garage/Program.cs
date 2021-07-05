@@ -5,10 +5,15 @@ namespace Exercise_5_Garage
 {
     class Program
     {
-        static IUI ui = new ConsoleUI();
+        static readonly IUI ui = new ConsoleUI();
+        static GarageHandler garageHandler = new();
         static void Main()
         {
-            ui.Print("Welcome to the Garage");
+            ui.Print("Welcome to a new Garage");
+            ui.Print("How big is the garage?");
+            string size = ui.Input();
+            ui.Print(size);
+            //garageHandler.Initiate();
         }
     }
 }

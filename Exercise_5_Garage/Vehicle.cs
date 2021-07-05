@@ -8,7 +8,7 @@ namespace Exercise_5_Garage
 {
     public abstract class Vehicle
     {
-        public string RegistrationNumber  { get; set; }
+        public string RegistrationNumber { get; set; }
         public string Color { get; set; }
         public int NumberOfWheels { get; set; }
 
@@ -18,9 +18,15 @@ namespace Exercise_5_Garage
             Color = color;
             NumberOfWheels = numberOfWheels;
         }
-        public void Add()
+
+        internal static void Add()
         {
-            s
+            throw new NotImplementedException();
+        }
+
+        internal static void Remove(Vehicle[] vehicles, string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

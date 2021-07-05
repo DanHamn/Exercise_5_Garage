@@ -3,5 +3,6 @@
     public interface IUI
     {
         void Print(string massage);
+        string Input();
     }
 }
