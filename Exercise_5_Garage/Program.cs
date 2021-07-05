@@ -11,9 +11,10 @@ namespace Exercise_5_Garage
         {
             ui.Print("Welcome to a new Garage");
             ui.Print("How big is the garage?");
-            string size = ui.Input();
-            ui.Print(size);
-            //garageHandler.Initiate();
+            string input = ui.Input();
+            _ = int.TryParse(input, out int size);
+            garageHandler.Initiate(size);
+
         }
     }
 }

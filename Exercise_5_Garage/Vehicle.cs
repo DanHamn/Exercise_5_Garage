@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Exercise_5_Garage
 {
-    public abstract class Vehicle
+    public abstract class Vehicle : IEnumerable
     {
         public string RegistrationNumber { get; set; }
         public string Color { get; set; }
@@ -25,6 +26,11 @@ namespace Exercise_5_Garage
         }
 
         internal static void Remove(Vehicle[] vehicles, string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator GetEnumerator()
         {
             throw new NotImplementedException();
         }
