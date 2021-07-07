@@ -9,6 +9,8 @@ namespace Exercise_5_Garage
 {
     public abstract class Vehicle : IEnumerable
     {
+        public IEnumerable<object> vehicles;
+
         public string RegistrationNumber { get; set; }
         public string Color { get; set; }
         public int NumberOfWheels { get; set; }
@@ -19,20 +21,24 @@ namespace Exercise_5_Garage
             Color = color;
             NumberOfWheels = numberOfWheels;
         }
-
-        internal static void Add()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static void Remove(Vehicle[] vehicles, string v)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerator GetEnumerator()
         {
-            throw new NotImplementedException();
+            foreach (var item in vehicles)
+            {
+                yield return item;
+            }
         }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return GetType().Name;
+        } 
+
+
     }
 }

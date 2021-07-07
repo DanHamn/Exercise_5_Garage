@@ -1,29 +1,62 @@
-﻿using System;
+﻿using Exercise_5_Garage.Vehicles;
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Exercise_5_Garage
 {
     class Garage<T> where T : Vehicle, IEnumerable
+
     {
-    public Vehicle[] vehicles;
+        private readonly Vehicle[] vehicles;
+
         public Garage(int capacity)
         {
             vehicles = new Vehicle[capacity];
         }
 
-        internal Vehicle AddVehicle(Vehicle vehicle, string v1, string v2, int v3)
+
+        internal void Add(Vehicle vehicle)
         {
-            vehicle = new Vehicles.Motorcycle(v1, v2, v3,"coal");
-            return vehicle;
+            FirstEmpty(vehicle);
         }
 
-        public void RemoveVehicle()
+        private void FirstEmpty(Vehicle vehicle)
         {
-            Vehicle.Remove(vehicles,"ABC123");
+            IUI ui = new ConsoleUI();
+            int i = 0;
+            foreach (Vehicle ve in vehicles)
+            {
+                if (ve == null)
+                {
+                    vehicles[i] = vehicle;
+                    break;
+                }
+                i++;
+                if (i == vehicles.Length)
+                {
+                    ui.Print($"Can not add {vehicle} with req number {vehicle.RegistrationNumber}.");
+                    ui.Print($"The Garage is full.");
+                }
+            }
+        }
+
+        internal int NumberOf(Garage<Vehicle> garage, Type type)
+        {
+            return garage.vehicles.Count(s => s != null && s.GetType() == type);
+        }
+
+        internal void NumberOf(bool v, Type type1, Type type2)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            foreach (var item in vehicles)
+            {
+                yield return item;
+            }
         }
     }
 }
