@@ -18,6 +18,16 @@ namespace Exercise_5_Garage
 
         internal void Add(Vehicle vehicle)
         {
+            IUI ui = new ConsoleUI();
+            foreach (Vehicle ve in vehicles)
+            {
+                if (ve != null && ve.RegistrationNumber == vehicle.RegistrationNumber)
+                {
+                    ui.Print($"Cannot add {vehicle} with reg. number {vehicle.RegistrationNumber}");
+                    ui.Print("There is already a vehicle in the garage with that reg. number");
+                    return;
+                }
+            }
             FirstEmpty(vehicle);
         }
 
@@ -35,8 +45,19 @@ namespace Exercise_5_Garage
                 i++;
                 if (i == vehicles.Length)
                 {
-                    ui.Print($"Can not add {vehicle} with req number {vehicle.RegistrationNumber}.");
+                    ui.Print($"Can not add {vehicle} with reg. number {vehicle.RegistrationNumber}.");
                     ui.Print($"The Garage is full.");
+                }
+            }
+        }
+
+        internal void Remove(Garage<Vehicle> garage, string v1)
+        {
+            for (int i = 0; i < garage.vehicles.Length; i++)
+            {
+                if (vehicles[i] != null && vehicles[i].RegistrationNumber.ToLower() == v1.ToLower())
+                {
+                    vehicles[i] = null;
                 }
             }
         }
@@ -44,11 +65,6 @@ namespace Exercise_5_Garage
         internal int NumberOf(Garage<Vehicle> garage, Type type)
         {
             return garage.vehicles.Count(s => s != null && s.GetType() == type);
-        }
-
-        internal void NumberOf(bool v, Type type1, Type type2)
-        {
-            throw new NotImplementedException();
         }
 
         public IEnumerator GetEnumerator()

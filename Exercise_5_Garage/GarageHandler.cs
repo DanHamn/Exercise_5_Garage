@@ -20,9 +20,9 @@ namespace Exercise_5_Garage
             garage.Add(new Vehicles.Motorcycle(v1, v2, v3, v4));
         }
 
-        public void RemoveVehicle(Garage<Vehicle> garage)
+        public void RemoveVehicle(Garage<Vehicle> garage, string v1)
         {
-            //Vehicle.Remove(garage.vehicles, "ABC123");
+            garage.Remove(garage,v1);
         }
 
         internal static int NumberOf(Garage<Vehicle> garage, Type type)

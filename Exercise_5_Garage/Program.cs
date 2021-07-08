@@ -14,21 +14,26 @@ namespace Exercise_5_Garage
         {
             ui.Print("Welcome to a new Garage");
             ui.Print("How big is the garage?");
-            string input = ui.Input();
-            _ = int.TryParse(input, out int size);
+            //string input = ui.Input();
+            //_ = int.TryParse(input, out int size);
             SeedData(5);
             ListGarage();
             ListType();
+            garageHandler.RemoveVehicle(garage, "abc124");
 
+            ListGarage();
+            garageHandler.AddCar(garage, "ABC224", "red", 4, "desiel", 5);
+            ListGarage();
         }
 
-        private static void ListType()
+        private static void ListType()//Finds all subclasses of vehicle and list the number of them in the garage
         {
-            ui.Print($"number of Motorcycles:{GarageHandler.NumberOf(garage, typeof(Vehicles.Motorcycle))}");
-            ui.Print($"number of Cars:{GarageHandler.NumberOf(garage, typeof(Vehicles.Car))}");
-            ui.Print($"number of Buses:{GarageHandler.NumberOf(garage, typeof(Vehicles.Bus))}");
-            ui.Print($"number of Boats:{GarageHandler.NumberOf(garage, typeof(Vehicles.Boat))}");
-            ui.Print($"number of Airplanes:{GarageHandler.NumberOf(garage, typeof(Vehicles.Airplane))}");
+            var assembly = typeof(Vehicle).Assembly;
+            var types = assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Vehicle)));
+            foreach (var type in types)
+            {
+                ui.Print($"The number of {type.Name}: {GarageHandler.NumberOf(garage, type)}");
+            }
         }
 
         private static void ListGarage()
@@ -53,11 +58,11 @@ namespace Exercise_5_Garage
         {
             garage = garageHandler.Initiate(size);
             garageHandler.AddMotorcycle(garage, "ABC123", "red", 4, "oil");
-            garageHandler.AddCar(garage, "ABC123", "red", 4, "desiel", 5);
-            garageHandler.AddCar(garage, "ABC123", "red", 4, "desiel", 5);
-            garageHandler.AddCar(garage, "ABC123", "red", 4, "desiel", 5);
-            //garageHandler.AddCar(garage, "ABC123", "red", 4, "desiel", 5);
-            //garageHandler.AddCar(garage, "ABC123", "red", 4, "desiel", 5);
+            garageHandler.AddCar(garage, "ABC124", "red", 4, "desiel", 5);
+            garageHandler.AddCar(garage, "ABC125", "red", 4, "desiel", 5);
+            garageHandler.AddCar(garage, "ABC126", "red", 4, "desiel", 5);
+            //garageHandler.AddCar(garage, "ABC127", "red", 4, "desiel", 5);
+            //garageHandler.AddCar(garage, "ABC128", "red", 4, "desiel", 5);
         }
     }
 }

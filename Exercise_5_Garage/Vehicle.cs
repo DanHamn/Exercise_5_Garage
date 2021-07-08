@@ -28,17 +28,14 @@ namespace Exercise_5_Garage
                 yield return item;
             }
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
-
         public override string ToString()
         {
             return GetType().Name;
-        } 
-
+        }
 
     }
 }
