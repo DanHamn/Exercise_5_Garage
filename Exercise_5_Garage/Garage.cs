@@ -16,7 +16,7 @@ namespace Exercise_5_Garage
         }
 
 
-        internal void Add(Vehicle vehicle)
+        internal void Add(Vehicle vehicle, bool v)
         {
             IUI ui = new ConsoleUI();
             foreach (Vehicle ve in vehicles)
@@ -28,10 +28,10 @@ namespace Exercise_5_Garage
                     return;
                 }
             }
-            FirstEmpty(vehicle);
+            FirstEmpty(vehicle,v);
         }
 
-        private void FirstEmpty(Vehicle vehicle)
+        private void FirstEmpty(Vehicle vehicle, bool v)
         {
             IUI ui = new ConsoleUI();
             int i = 0;
@@ -40,6 +40,11 @@ namespace Exercise_5_Garage
                 if (ve == null)
                 {
                     vehicles[i] = vehicle;
+                    if (v)
+                    {
+                    ui.Print($"The {vehicle} with reg. number {vehicle.RegistrationNumber} was parked");
+
+                    }
                     break;
                 }
                 i++;
@@ -61,6 +66,7 @@ namespace Exercise_5_Garage
                 }
             }
         }
+
 
         internal int NumberOf(Garage<Vehicle> garage, Type type)
         {
