@@ -10,9 +10,24 @@ namespace Exercise_5_Garage
     public abstract class Vehicle : IEnumerable
     {
         public IEnumerable<object> vehicles;
+        private string registrationNumber;
+        public string color;
+        public int numberOfWheels;
 
-        public string RegistrationNumber { get; set; }
-        public string Color { get; set; }
+        public string RegistrationNumber
+        {
+            get { return registrationNumber; }
+            set { registrationNumber = value.ToUpper(); }
+        }
+        public string Color
+        {
+            get { return color; }
+            set
+            {
+                string temp = value.ToLower();
+                color = char.ToUpper(temp[0]) + temp[1..];
+            }
+        }
         public int NumberOfWheels { get; set; }
 
         public Vehicle(string registrationNumber, string color, int numberOfWheels)

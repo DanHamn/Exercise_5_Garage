@@ -1,7 +1,8 @@
-﻿using Exercise_5_Garage.Vehicles;
+﻿using Exercise_5_Garage.vehicles;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Reflection;
 
 namespace Exercise_5_Garage
 {
@@ -28,7 +29,7 @@ namespace Exercise_5_Garage
                     return;
                 }
             }
-            FirstEmpty(vehicle,v);
+            FirstEmpty(vehicle, v);
         }
 
         private void FirstEmpty(Vehicle vehicle, bool v)
@@ -42,13 +43,12 @@ namespace Exercise_5_Garage
                     vehicles[i] = vehicle;
                     if (v)
                     {
-                    ui.Print($"The {vehicle} with reg. number {vehicle.RegistrationNumber} was parked");
-
+                        ui.Print($"The {vehicle} with reg. number {vehicle.RegistrationNumber} was parked");
                     }
                     break;
                 }
                 i++;
-                if (i == vehicles.Length)
+                if (i == vehicles.Length && v)
                 {
                     ui.Print($"Can not add {vehicle} with reg. number {vehicle.RegistrationNumber}.");
                     ui.Print($"The Garage is full.");

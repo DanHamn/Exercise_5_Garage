@@ -7,150 +7,142 @@ using System.Collections;
 
 namespace Exercise_5_Garage
 {
-    class GarageHandler
+    class GarageHandler : IHandler
     {
-        static readonly IUI ui = new ConsoleUI();
         private static readonly Random random = new();
-        public Garage<Vehicle> Initiate(int size, int filled)
+        (Garage<Vehicle>, bool) IHandler.Initiate(int size, int numberOfVehicles)
         {
+            bool full = false;
             Garage<Vehicle> garage = new(size);
-            if (filled == 0)
+            if (numberOfVehicles == 0)
             {
-                return garage;
+                return (garage, full);
             }
             else
             {
-                List<Vehicle> listOfVehicles = RandomListOfVehicles(filled);
-                foreach (var vehicle in listOfVehicles)
+                for (int i = 0; i < numberOfVehicles; i++)
                 {
-                    garage.Add(vehicle,false);
+                    Vehicle vehicle = CreateRandomVehicle();
+                    garage.Add(vehicle, false);
+                    if (numberOfVehicles > size)
+                    {
+                        full = true;
+                    }
                 }
-                return garage;
+                return (garage, full);
             }
         }
-
-        private List<Vehicle> RandomListOfVehicles(int filled)
+        public Vehicle CreateRandomVehicle()
         {
-            List<Vehicle> listOfVehicles = new();
-            for (int i = 0; i < filled; i++)
-            {
-                Vehicle vehicle = CreateRandomVehicle();
-                listOfVehicles.Add(vehicle);
-            }            
-            return listOfVehicles;
-        }
-
-        public static Vehicle CreateRandomVehicle()
-        {
-            List<Type> typesList = ListOfVehicles();
+            List<Type> typesList = TypesOfVehicles().ToList();
             int rnd = random.Next(0, typesList.Count);
             Vehicle vehicle = null;
             if (typesList[rnd].Name == "Motorcycle")
             {
-                vehicle = new Vehicles.Motorcycle(RandRegNm(), RandColor(), random.Next(1, 4), RandFuel(null));
+                vehicle = new vehicles.Motorcycle(RandomInput.RandRegNm(), RandomInput.RandColor(), random.Next(1, 4), RandomInput.RandFuel(null));
             }
             else if (typesList[rnd].Name == "Car")
             {
-                vehicle = new Vehicles.Car(RandRegNm(), RandColor(), random.Next(2, 4), RandFuel(null), random.Next(2, 3));
+                vehicle = new vehicles.Car(RandomInput.RandRegNm(), RandomInput.RandColor(), random.Next(2, 4), RandomInput.RandFuel(null), random.Next(2, 3));
             }
             else if (typesList[rnd].Name == "Bus")
             {
-                vehicle = new Vehicles.Bus(RandRegNm(), RandColor(), random.Next(2, 6), RandFuel(null), random.Next(2, 3), random.Next(5, 20));
+                vehicle = new vehicles.Bus(RandomInput.RandRegNm(), RandomInput.RandColor(), random.Next(2, 6), RandomInput.RandFuel(null), random.Next(2, 3), random.Next(5, 20));
             }
             else if (typesList[rnd].Name == "Boat")
             {
-                var boat = RandBoat();
-                vehicle = new Vehicles.Boat(RandRegNm(), RandColor(), 0, boat, RandFuel(boat), random.Next(5, 20));
+                var boat = RandomInput.RandBoat();
+                vehicle = new vehicles.Boat(RandomInput.RandRegNm(), RandomInput.RandColor(), 0, boat, RandomInput.RandFuel(boat), random.Next(5, 20));
             }
             else if (typesList[rnd].Name == "Airplane")
             {
-                var boat = RandBoat();
-                vehicle = new Vehicles.Airplane(RandRegNm(), RandColor(), random.Next(2, 6), random.Next(20, 100), random.Next(0, 6));
+                vehicle = new vehicles.Airplane(RandomInput.RandRegNm(), RandomInput.RandColor(), random.Next(2, 6), random.Next(20, 100), random.Next(0, 6));
             }
-
             return vehicle;
         }
-
-        private static List<Type> ListOfVehicles()
+        public IEnumerable<Type> TypesOfVehicles()
         {
-            var types = TypesOfVehicles();
-            List<Type> typesList = new();
-            foreach (var type in types)
-            {
-                typesList.Add(type);
-            }
-
-            return typesList;
-        }
-
-        private static string RandRegNm()
-        {
-            const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string chars = new(Enumerable.Repeat(characters, 3)
-                .Select(s => s[random.Next(s.Length)])
-                .ToArray());
-            int value = random.Next(1000);
-
-            return new string(chars + value.ToString("000"));
-        }
-        private static string RandColor()
-        {
-            string[] colors = new string[] { "Red", "Blue", "Gray", "Black", "Yellow" };
-            return colors[random.Next(colors.Length)];
-        }
-        private static string RandFuel(string boat)
-        {
-            if (boat == "sailing")
-            {
-                return "Wind";
-            }
-            else
-            {
-                string[] fuel = new string[] { "Gasoline", "Diesel" };
-                return fuel[random.Next(fuel.Length)];
-            }
-        }
-        private static string RandBoat()
-        {
-            string[] boat = new string[] { "Sailing", "Motor" };
-            return boat[random.Next(boat.Length)];
-        }
-
-        private static IEnumerable<Type> TypesOfVehicles()
-        {
-            var assembly = typeof(Vehicle).Assembly;
-            var types = assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Vehicle)));
+            var types = typeof(Vehicle)
+                .Assembly
+                .GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(Vehicle)));
             return types;
         }
 
-        internal void AddMotorcycle(Garage<Vehicle> garage, string v1, string v2, int v3, string v4)
+        Vehicle IHandler.CreateVehicle(List<object> specifics)
         {
-            garage.Add(new Vehicles.Motorcycle(v1, v2, v3, v4),true);
-        }
-        internal void AddCar(Garage<Vehicle> garage, string v1, string v2, int v3, string v4, int v5)
-        {
-            garage.Add(new Vehicles.Car(v1, v2, v3, v4, v5),true);
+            Vehicle vehicle = null;
+            if ((string)specifics[0] == "Motorcycle")
+            {
+                vehicle = new vehicles.Motorcycle((string)specifics[1], (string)specifics[2], (int)specifics[3], (string)specifics[4]);
+            }
+            else if ((string)specifics[0] == "Car")
+            {
+                vehicle = new vehicles.Car((string)specifics[1], (string)specifics[2], (int)specifics[3], (string)specifics[4], (int)specifics[5]);
+            }
+            else if ((string)specifics[0] == "Bus")
+            {
+                vehicle = new vehicles.Bus((string)specifics[1], (string)specifics[2], (int)specifics[3], (string)specifics[4], (int)specifics[5], (double)specifics[6]);
+            }
+            else if ((string)specifics[0] == "Boat")
+            {
+                vehicle = new vehicles.Boat((string)specifics[1], (string)specifics[2], (int)specifics[3], (string)specifics[4], (string)specifics[5], (double)specifics[6]);
+            }
+            else if ((string)specifics[0] == "Airplane")
+            {
+                vehicle = new vehicles.Airplane((string)specifics[1], (string)specifics[2], (int)specifics[3], (double)specifics[4], (int)specifics[5]);
+            }
+            return vehicle;
         }
 
-        public static void RemoveVehicle(Garage<Vehicle> garage, string v1)
+        void IHandler.RemoveVehicle(Garage<Vehicle> garage, string v1)
         {
             garage.Remove(garage, v1);
         }
 
-        internal static Vehicle CreateVehicle()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static int NumberOf(Garage<Vehicle> garage, Type type)
+        int IHandler.NumberOf(Garage<Vehicle> garage, Type type)
         {
             return garage.NumberOf(garage, type);
         }
 
-
-        internal static string GetRegNummer(Vehicle item)
+        string IHandler.GetRegNummer(Vehicle item)
         {
             return item.RegistrationNumber;
+        }
+
+        (int, bool, string) IHandler.RegNumberSearch(Garage<Vehicle> garage, string regNum)
+        {
+            int i = 0;
+            foreach (Vehicle vehicle in garage)
+            {
+                if (vehicle.RegistrationNumber == regNum)
+                {
+                    return (i, true, vehicle.GetType().Name);
+                }
+                i++;
+            }
+            return (i, false, null);
+        }
+
+        int IHandler.CharacteristicsSearch(Garage<Vehicle> garage, string searchProp, string searchTerm)
+        {
+            int i = 0;
+            foreach (Vehicle vehicle in garage)
+            {
+                var properties = vehicle.GetType().GetProperties();
+                foreach (var prop in properties)
+                {
+                    if (prop.Name.ToLower() == searchProp.ToLower())
+                    {
+                        if (prop.GetValue(prop.Name).ToString().ToLower() == searchTerm.ToLower())
+                        {
+                            i++;
+                        }
+                    }
+
+                }
+            }
+            return i;
         }
     }
 }
