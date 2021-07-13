@@ -10,7 +10,21 @@ namespace Exercise_5_Garage
     {
         public string Input()
         {
-            return Console.ReadLine();
+            string input = "";
+            while (true)
+            {
+                input = Console.ReadLine();
+                if (input == "")
+                {
+                    Console.WriteLine("Please make an input.");
+                }
+                else
+                {
+                    break;
+                }
+
+            }
+            return input;
         }
 
         public void Print(string massage)

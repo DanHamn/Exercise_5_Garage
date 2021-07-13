@@ -10,10 +10,11 @@ namespace Exercise_5_Garage
     class GarageHandler : IHandler
     {
         private static readonly Random random = new();
-        (Garage<Vehicle>, bool) IHandler.Initiate(int size, int numberOfVehicles)
+        private static readonly IHandler handler = new GarageHandler();
+        (Garage<IVehicle>, bool) IHandler.Initiate(int size, int numberOfVehicles)
         {
             bool full = false;
-            Garage<Vehicle> garage = new(size);
+            Garage<IVehicle> garage = new(size);
             if (numberOfVehicles == 0)
             {
                 return (garage, full);
@@ -22,7 +23,7 @@ namespace Exercise_5_Garage
             {
                 for (int i = 0; i < numberOfVehicles; i++)
                 {
-                    Vehicle vehicle = CreateRandomVehicle();
+                    IVehicle vehicle = handler.CreateRandomVehicle();
                     garage.Add(vehicle, false);
                     if (numberOfVehicles > size)
                     {
@@ -32,11 +33,11 @@ namespace Exercise_5_Garage
                 return (garage, full);
             }
         }
-        public Vehicle CreateRandomVehicle()
+        IVehicle IHandler.CreateRandomVehicle()
         {
             List<Type> typesList = TypesOfVehicles().ToList();
             int rnd = random.Next(0, typesList.Count);
-            Vehicle vehicle = null;
+            IVehicle vehicle = null;
             if (typesList[rnd].Name == "Motorcycle")
             {
                 vehicle = new vehicles.Motorcycle(RandomInput.RandRegNm(), RandomInput.RandColor(), random.Next(1, 4), RandomInput.RandFuel(null));
@@ -69,9 +70,9 @@ namespace Exercise_5_Garage
             return types;
         }
 
-        Vehicle IHandler.CreateVehicle(List<object> specifics)
+        IVehicle IHandler.CreateVehicle(List<object> specifics)
         {
-            Vehicle vehicle = null;
+            IVehicle vehicle = null;
             if ((string)specifics[0] == "Motorcycle")
             {
                 vehicle = new vehicles.Motorcycle((string)specifics[1], (string)specifics[2], (int)specifics[3], (string)specifics[4]);
@@ -95,27 +96,32 @@ namespace Exercise_5_Garage
             return vehicle;
         }
 
-        void IHandler.RemoveVehicle(Garage<Vehicle> garage, string v1)
+        void IHandler.AddVehicle(Garage<IVehicle> garage, IVehicle vehicle, bool v)
+        {
+            garage.Add(vehicle, v);
+        }
+
+        void IHandler.RemoveVehicle(Garage<IVehicle> garage, string v1)
         {
             garage.Remove(garage, v1);
         }
 
-        int IHandler.NumberOf(Garage<Vehicle> garage, Type type)
+        int IHandler.NumberOf(Garage<IVehicle> garage, Type type)
         {
             return garage.NumberOf(garage, type);
         }
 
-        string IHandler.GetRegNummer(Vehicle item)
+        string IHandler.GetRegNummer(IVehicle item)
         {
             return item.RegistrationNumber;
         }
 
-        (int, bool, string) IHandler.RegNumberSearch(Garage<Vehicle> garage, string regNum)
+        (int, bool, string) IHandler.RegNumberSearch(Garage<IVehicle> garage, string regNum)
         {
             int i = 0;
             foreach (Vehicle vehicle in garage)
             {
-                if (vehicle.RegistrationNumber == regNum)
+                if (vehicle != null && vehicle.RegistrationNumber == regNum)
                 {
                     return (i, true, vehicle.GetType().Name);
                 }
@@ -124,25 +130,30 @@ namespace Exercise_5_Garage
             return (i, false, null);
         }
 
-        int IHandler.CharacteristicsSearch(Garage<Vehicle> garage, string searchProp, string searchTerm)
+        (List<int>, List<IVehicle>) IHandler.CharacteristicsSearch(Garage<IVehicle> garage, List<string> searchPropList, List<string> searchTermList)
         {
-            int i = 0;
-            foreach (Vehicle vehicle in garage)
+            List<IVehicle> vehicles = new();
+            List<int> parkingSlot = new();
+            for (int i = 0; i < searchPropList.Count; i++)
             {
-                var properties = vehicle.GetType().GetProperties();
-                foreach (var prop in properties)
+                foreach (IVehicle vehicle in garage)
                 {
-                    if (prop.Name.ToLower() == searchProp.ToLower())
+                    var properties = vehicle.GetType().GetProperties();
+                    foreach (var prop in properties)
                     {
-                        if (prop.GetValue(prop.Name).ToString().ToLower() == searchTerm.ToLower())
+                        if (prop.Name.ToLower() == searchPropList[i].ToLower())
                         {
-                            i++;
+                            if ($"{vehicle.NumberOfWheels}" == searchTermList[i].ToLower())
+                            {
+                                vehicles.Add(vehicle);
+                                parkingSlot.Add(i);
+                            }
                         }
                     }
-
                 }
             }
-            return i;
+            return (parkingSlot, vehicles);
         }
+
     }
 }

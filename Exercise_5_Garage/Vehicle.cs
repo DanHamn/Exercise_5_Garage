@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Exercise_5_Garage
 {
-    public abstract class Vehicle : IEnumerable
+    public abstract class Vehicle : IVehicle, IEnumerable
     {
         public IEnumerable<object> vehicles;
         private string registrationNumber;

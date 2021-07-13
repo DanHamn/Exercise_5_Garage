@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Exercise_5_Garage
 {
@@ -10,13 +11,14 @@ namespace Exercise_5_Garage
     {
         static readonly IUI ui = new ConsoleUI();
         public static IHandler handler = new GarageHandler();
-        public static Garage<Vehicle> garage;
+        public static Garage<IVehicle> garage;
         public static void Start()
         {
 
             ui.Print("Welcome to the garage manager program" +
                 "\nLets Start by building a garage.");
             CreateGarage();
+            ListGarage();
             ui.Print("What would you like to do next?");
             MenuText();
             bool exit = false;
@@ -60,11 +62,11 @@ namespace Exercise_5_Garage
         private static void SearchWithRegNumber()
         {
             ui.Print("Please input the registration number for the vehicle you want to search for:");
-            string regNum = ui.Input();
+            string regNum = RegNumInput();
             (int i, bool exists, string type) = handler.RegNumberSearch(garage, regNum);
             if (exists == true)
             {
-                ui.Print($"The {type} with registration number is in the garage on spot number {i}");
+                ui.Print($"The {type} with registration number {regNum} is in the garage on spot number {i+1}");
             }
             else if (exists == false)
             {
@@ -85,6 +87,10 @@ namespace Exercise_5_Garage
                 }
             }
             bool exit = false;
+            string searchProp = null;
+            string searchTerm = null;
+            List<string> searchPropList = new();
+            List<string> searchTermList = new();
             while (exit != true)
             {
                 ui.Print("What do you want to do?" +
@@ -93,8 +99,6 @@ namespace Exercise_5_Garage
                     "\n3. Clear list of previous specified search terms" +
                     "\n0. Exit to main menu.");
 
-                string searchProp = null;
-                string searchTerm = null;
                 switch (ui.Input()[0])
                 {
                     case '1':
@@ -109,9 +113,9 @@ namespace Exercise_5_Garage
                             }
 
                             searchProp = ui.Input();
-                            foreach (var prop2 in propertyList)
+                            foreach (var prop in propertyList)
                             {
-                                if (!prop2.ToLower().Contains(searchProp.ToLower()))
+                                if (!prop.ToLower().Contains(searchProp.ToLower()))
                                 {
                                     ui.Print("Please enter a characterestic from the list of alternatives.");
                                 }
@@ -122,14 +126,35 @@ namespace Exercise_5_Garage
                                     done = true;
                                 }
                             }
-
                         }
+                        searchPropList.Add(searchProp);
+                        searchTermList.Add(searchTerm);
                         break;
                     case '2':
-                            int number = handler.CharacteristicsSearch(garage, searchProp, searchTerm);
-                        ui.Print("");
+                        List<IVehicle> vehicles;
+                        List<int> parkingSlot;
+                        (parkingSlot, vehicles) = handler.CharacteristicsSearch(garage, searchPropList, searchTermList);
+                        if (parkingSlot[0].ToString() == null)
+                        {
+                            ui.Print("There was no vehicles with the characteristics you searched for.");
+                        }
+                        else
+                        {
+                            ui.Print(string.Format("These are vehicles that are " +
+                                "\n({0}).", string.Join(", ", searchTermList)));
+
+                            for (int i = 0; i < parkingSlot.Count; i++)
+                            {
+                                ui.Print($"|{parkingSlot[i]}|: {vehicles[i]} with req nummer {handler.GetRegNummer(vehicles[i])}");
+                            }
+                        }
                         break;
                     case '3':
+                        searchPropList = null;
+                        searchTermList = null;
+                        break;
+                    case '0':
+                        exit = true;
                         break;
                     default:
                         break;
@@ -140,10 +165,10 @@ namespace Exercise_5_Garage
 
         private static void MenuText()
         {
-            ui.Print("Please navigate through the menu by inputting the number \n(1, 2, 3 ,4, 5, 6, 0) of your choice"
-                + "\n1. Create a new garage; either an empty one or one populated with random vehicles."
-                + "\n2. Add or remove a vehicle from the garage."
-                + "\n3. Show the full list of the garage."
+            ui.Print("Please navigate through the menu by inputting the number \n(1, 2, 3 ,4, 5, 6, 7, 0) of your choice"
+                + "\n1. Create a new garage."
+                + "\n2. Add or remove a vehicle from the current garage."
+                + "\n3. Show the list of the garage."
                 + "\n4. Show the number of specific vehicles in the garage."
                 + "\n5. Search for a vehicle based on registration number."
                 + "\n6. Search for vehicles based on characteristics."
@@ -164,6 +189,7 @@ namespace Exercise_5_Garage
                     "\nThe capacity of the garage is too small.");
             }
         }
+
         private static void AddOrRemove()
         {
             bool exit = false;
@@ -178,24 +204,32 @@ namespace Exercise_5_Garage
                 switch (ui.Input()[0])
                 {
                     case '1':
-                        ui.Print("1. Add a random vehicle" +
-                            "\n2. Add a specific vehicle");
-                        switch (ui.Input()[0])
+                        bool exit1 = false;
+                        while (exit1 != true)
                         {
-                            case '1':
-                                garage.Add(handler.CreateRandomVehicle(), true);
-                                break;
-                            case '2':
-                                garage.Add(CreateSpecificVehicle(), true);
-                                break;
-                            default:
-                                ui.Print("Please enter some valid input (1, 2, 0)");
-                                break;
+                            ui.Print("1. Add a random vehicle" +
+                                "\n2. Add a specific vehicle" +
+                                "\n0. Exit to previous menu");
+                            switch (ui.Input()[0])
+                            {
+                                case '1':
+                                    handler.AddVehicle(garage, handler.CreateRandomVehicle(), true);
+                                    break;
+                                case '2':
+                                    handler.AddVehicle(garage, CreateSpecificVehicle(), true);
+                                    break;
+                                case '0':
+                                    exit1 = true;
+                                    break;
+                                default:
+                                    ui.Print("Please enter some valid input (1, 2, 0)");
+                                    break;
+                            }
                         }
                         break;
                     case '2':
                         ui.Print("Enter the registration number for the vehicle you want to remove.");
-                        string input = ui.Input();
+                        string input = RegNumInput();
                         handler.RemoveVehicle(garage, input);
                         break;
                     case '0':
@@ -209,9 +243,36 @@ namespace Exercise_5_Garage
             }
         }
 
-        private static Vehicle CreateSpecificVehicle()
+        private static string RegNumInput()
         {
-            Vehicle vehicle = null;
+            bool done = false;
+            string input = new("");
+            while (done != true)
+            {
+                string v = ui.Input();
+                if (v.Length == 6)
+                {
+                    string firstHalf = v.Substring(0, 3).ToUpper();
+                    string secondHalf = v.Substring(3, 3).ToUpper();
+                    bool alphabetic = Regex.IsMatch(firstHalf, @"^[a-zA-Z]+$");
+                    bool numeric = int.TryParse(secondHalf, out _);
+                    if (alphabetic != true || numeric != true)
+                    {
+                        ui.Print("The registration number most be in the form of \"ABC123\"!");
+                    }
+                    else
+                    {
+                        input = v.ToUpper();
+                        done = true;
+                    }
+                }
+            }
+            return input;
+        }
+
+        private static IVehicle CreateSpecificVehicle()
+        {
+            IVehicle vehicle = null;
             List<object> specifics = new();
 
             string type = BaseProp(specifics);
@@ -238,14 +299,14 @@ namespace Exercise_5_Garage
             }
             else
             {
-                ui.Print($"{type} was not a valid type");
+                ui.Print($"{type} was not a valid type of vehicle");
             }
             return vehicle;
         }
 
-        private static Vehicle CreateAirplane(List<object> specifics, string type)
+        private static IVehicle CreateAirplane(List<object> specifics, string type)
         {
-            Vehicle vehicle;
+            IVehicle vehicle;
             ui.Print($"How big is the wingspan of the {type} in meters?");
             double wingspan = LowerThenDoubleCheck(0);
             specifics.Add(wingspan);
@@ -256,9 +317,9 @@ namespace Exercise_5_Garage
             return vehicle;
         }
 
-        private static Vehicle CreateBoat(List<object> specifics, string type)
+        private static IVehicle CreateBoat(List<object> specifics, string type)
         {
-            Vehicle vehicle;
+            IVehicle vehicle;
             ui.Print($"What kind of {type} is it?");
             string boatType = ui.Input();
             specifics.Add(boatType);
@@ -272,9 +333,9 @@ namespace Exercise_5_Garage
             return vehicle;
         }
 
-        private static Vehicle CreateBus(List<object> specifics, string type)
+        private static IVehicle CreateBus(List<object> specifics, string type)
         {
-            Vehicle vehicle;
+            IVehicle vehicle;
             ui.Print($"What type of fuel is the {type} using?");
             string fuelType = ui.Input();
             specifics.Add(fuelType);
@@ -288,9 +349,9 @@ namespace Exercise_5_Garage
             return vehicle;
         }
 
-        private static Vehicle CreateCar(List<object> specifics, string type)
+        private static IVehicle CreateCar(List<object> specifics, string type)
         {
-            Vehicle vehicle;
+            IVehicle vehicle;
             ui.Print($"What type of fuel is the {type} using?");
             string fuelType = ui.Input();
             specifics.Add(fuelType);
@@ -301,9 +362,9 @@ namespace Exercise_5_Garage
             return vehicle;
         }
 
-        private static Vehicle CreateMotorcycle(List<object> specifics, string type)
+        private static IVehicle CreateMotorcycle(List<object> specifics, string type)
         {
-            Vehicle vehicle;
+            IVehicle vehicle;
             ui.Print($"What type of fuel is the {type} using?");
             string fuelType = ui.Input();
             specifics.Add(fuelType);
@@ -314,11 +375,11 @@ namespace Exercise_5_Garage
         private static string BaseProp(List<object> specifics)
         {
             ui.Print("What type of vehicle do you want to add?");
-            string type = ui.Input();
+            string type = Typecheck();
             specifics.Add(type);
 
             ui.Print($"What is the registration number for the {type}?");
-            string registrationNumber = ui.Input();
+            string registrationNumber = RegNumInput();
             specifics.Add(registrationNumber);
 
             ui.Print($"What color is the {type}?");
@@ -326,9 +387,38 @@ namespace Exercise_5_Garage
             specifics.Add(color);
 
             ui.Print($"What is the number of wheels on the {type}?");
-            int numberOfWheels = LowerThenIntCheck(1);
+            int numberOfWheels = LowerThenIntCheck(0);
             specifics.Add(numberOfWheels);
             return type;
+        }
+
+        private static string Typecheck()
+        {
+            bool done = false;
+            string output = new("");
+            while (done != true)
+            {
+                var types = handler.TypesOfVehicles();
+                output = ui.Input();
+                foreach (var type in types)
+                {
+                    if (type.Name == output)
+                    {
+                        done = true;
+                        break;
+                    }
+                }
+                if (done != true)
+                {
+                    ui.Print("That was not an inplimented type." +
+                        "\nPlease input a type that is in this list:");
+                    foreach (var type1 in types)
+                    {
+                        ui.Print($"\t{type1}");
+                    }
+                }
+            }
+            return output;
         }
 
         private static double LowerThenDoubleCheck(int lowestDouble)
@@ -354,7 +444,7 @@ namespace Exercise_5_Garage
             while (done != true)
             {
                 done = int.TryParse(ui.Input(), out integer);
-                if (done != true && integer < lowestInt)
+                if (done != true || integer < lowestInt)
                 {
                     ui.Print($"Have to input an integer bigger then {lowestInt}.");
                     done = false;

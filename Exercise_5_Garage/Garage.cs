@@ -6,21 +6,21 @@ using System.Reflection;
 
 namespace Exercise_5_Garage
 {
-    class Garage<T> where T : Vehicle, IEnumerable
+    class Garage<T> where T : IVehicle, IEnumerable
 
     {
-        private readonly Vehicle[] vehicles;
+        private readonly IVehicle[] vehicles;
 
         public Garage(int capacity)
         {
-            vehicles = new Vehicle[capacity];
+            vehicles = new IVehicle[capacity];
         }
 
 
-        internal void Add(Vehicle vehicle, bool v)
+        internal void Add(IVehicle vehicle, bool v)
         {
             IUI ui = new ConsoleUI();
-            foreach (Vehicle ve in vehicles)
+            foreach (IVehicle ve in vehicles)
             {
                 if (ve != null && ve.RegistrationNumber == vehicle.RegistrationNumber)
                 {
@@ -32,11 +32,11 @@ namespace Exercise_5_Garage
             FirstEmpty(vehicle, v);
         }
 
-        private void FirstEmpty(Vehicle vehicle, bool v)
+        private void FirstEmpty(IVehicle vehicle, bool v)
         {
             IUI ui = new ConsoleUI();
             int i = 0;
-            foreach (Vehicle ve in vehicles)
+            foreach (IVehicle ve in vehicles)
             {
                 if (ve == null)
                 {
@@ -56,7 +56,7 @@ namespace Exercise_5_Garage
             }
         }
 
-        internal void Remove(Garage<Vehicle> garage, string v1)
+        internal void Remove(Garage<IVehicle> garage, string v1)
         {
             for (int i = 0; i < garage.vehicles.Length; i++)
             {
@@ -68,7 +68,7 @@ namespace Exercise_5_Garage
         }
 
 
-        internal int NumberOf(Garage<Vehicle> garage, Type type)
+        internal int NumberOf(Garage<IVehicle> garage, Type type)
         {
             return garage.vehicles.Count(s => s != null && s.GetType() == type);
         }
