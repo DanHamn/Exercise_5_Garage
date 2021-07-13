@@ -66,7 +66,7 @@ namespace Exercise_5_Garage
             (int i, bool exists, string type) = handler.RegNumberSearch(garage, regNum);
             if (exists == true)
             {
-                ui.Print($"The {type} with registration number {regNum} is in the garage on spot number {i+1}");
+                ui.Print($"The {type} with registration number {regNum} is in the garage on spot number {i + 1}");
             }
             else if (exists == false)
             {
@@ -77,7 +77,11 @@ namespace Exercise_5_Garage
         private static void SearchAfterCharacteristics()
         {
             List<string> propertyList = new();
-            Type[] types = typeof(Vehicle).Assembly.GetTypes();
+            var types = typeof(IVehicle).Assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(Vehicle)));
+            foreach (var type in types)
+            {
+                propertyList.Add(type.Name);
+            }
             foreach (var type in types)
             {
                 foreach (PropertyInfo prop in type.GetProperties())
@@ -87,8 +91,6 @@ namespace Exercise_5_Garage
                 }
             }
             bool exit = false;
-            string searchProp = null;
-            string searchTerm = null;
             List<string> searchPropList = new();
             List<string> searchTermList = new();
             while (exit != true)
@@ -102,6 +104,8 @@ namespace Exercise_5_Garage
                 switch (ui.Input()[0])
                 {
                     case '1':
+                        string searchProp = null;
+                        string searchTerm = null;
                         bool done = false;
                         while (done != true)
                         {
@@ -115,43 +119,74 @@ namespace Exercise_5_Garage
                             searchProp = ui.Input();
                             foreach (var prop in propertyList)
                             {
-                                if (!prop.ToLower().Contains(searchProp.ToLower()))
+                                if (prop.ToLower() == searchProp.ToLower())
                                 {
-                                    ui.Print("Please enter a characterestic from the list of alternatives.");
+                                    for (int i = 0; i < types.Count(); i++)
+                                    {
+                                        if (prop == propertyList[i])
+                                        {
+                                            searchTerm = "";
+                                            done = true;
+                                            break;
+                                        }
+                                    }
+                                    if (searchTerm == null)
+                                    {
+                                        ui.Print("Please enter the term you want to search for");
+                                        searchTerm = ui.Input();
+                                        done = true;
+                                        break;
+                                    }
                                 }
-                                else
+                                if (searchTerm != null)
                                 {
-                                    ui.Print("Please enter the term you want to search for");
-                                    searchTerm = ui.Input();
-                                    done = true;
+                                    break;
                                 }
                             }
+                            if (searchTerm == null)
+                            {
+                                ui.Print("Please enter a characterestic from the list of alternatives.");
+                                done = false;
+                            }
+
                         }
                         searchPropList.Add(searchProp);
                         searchTermList.Add(searchTerm);
                         break;
                     case '2':
                         List<IVehicle> vehicles;
-                        List<int> parkingSlot;
-                        (parkingSlot, vehicles) = handler.CharacteristicsSearch(garage, searchPropList, searchTermList);
-                        if (parkingSlot[0].ToString() == null)
+                        vehicles = handler.CharacteristicsSearch(garage, searchPropList, searchTermList);
+                        if (vehicles.Count == 0)
                         {
                             ui.Print("There was no vehicles with the characteristics you searched for.");
                         }
                         else
                         {
-                            ui.Print(string.Format("These are vehicles that are " +
-                                "\n({0}).", string.Join(", ", searchTermList)));
-
-                            for (int i = 0; i < parkingSlot.Count; i++)
+                            List<string> strOutput = new();
+                            for (int i = 0; i < searchPropList.Count; i++)
                             {
-                                ui.Print($"|{parkingSlot[i]}|: {vehicles[i]} with req nummer {handler.GetRegNummer(vehicles[i])}");
+                                if (string.IsNullOrEmpty(searchTermList[i]))
+                                {
+                                    strOutput.Add($"{searchPropList[i]}");
+                                }
+                                else
+                                {
+                                    strOutput.Add($"{searchTermList[i]}");
+
+                                }
+                            }
+                            ui.Print(string.Format("These are vehicles that are " +
+                                "\n{0}.", string.Join(", ", strOutput)));
+
+                            for (int i = 0; i < vehicles.Count; i++)
+                            {
+                                ui.Print($"{vehicles[i]} with req nummer {handler.GetRegNummer(vehicles[i])}");
                             }
                         }
                         break;
                     case '3':
-                        searchPropList = null;
-                        searchTermList = null;
+                        searchPropList.Clear();
+                        searchTermList.Clear();
                         break;
                     case '0':
                         exit = true;

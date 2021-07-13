@@ -14,6 +14,6 @@ namespace Exercise_5_Garage
         internal int NumberOf(Garage<IVehicle> garage, Type type);
         internal string GetRegNummer(IVehicle item);
         internal (int, bool, string) RegNumberSearch(Garage<IVehicle> garage, string regNum);
-        internal (List<int>, List<IVehicle>) CharacteristicsSearch(Garage<IVehicle> garage, List<string> searchPropList, List<string> searchTermList);
+        internal List<IVehicle> CharacteristicsSearch(Garage<IVehicle> garage, List<string> searchPropList, List<string> searchTermList);
     }
 }

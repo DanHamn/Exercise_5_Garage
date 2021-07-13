@@ -130,30 +130,43 @@ namespace Exercise_5_Garage
             return (i, false, null);
         }
 
-        (List<int>, List<IVehicle>) IHandler.CharacteristicsSearch(Garage<IVehicle> garage, List<string> searchPropList, List<string> searchTermList)
+        List<IVehicle> IHandler.CharacteristicsSearch(Garage<IVehicle> garage, List<string> searchPropList, List<string> searchTermList)
         {
             List<IVehicle> vehicles = new();
-            List<int> parkingSlot = new();
-            for (int i = 0; i < searchPropList.Count; i++)
+            foreach (IVehicle vehicle in garage)
             {
-                foreach (IVehicle vehicle in garage)
+                int correct = 0;
+                for (int i = 0; i < searchPropList.Count; i++)
                 {
-                    var properties = vehicle.GetType().GetProperties();
+                    var properties = vehicle?.GetType().GetProperties();
+                    List<object> propName = new();
+                    foreach (var prop in properties)
+                    {
+                        propName.Add(prop.Name);
+                    }
                     foreach (var prop in properties)
                     {
                         if (prop.Name.ToLower() == searchPropList[i].ToLower())
                         {
-                            if ($"{vehicle.NumberOfWheels}" == searchTermList[i].ToLower())
+                            if (vehicle.GetType().GetProperty(prop.Name)?.GetValue(vehicle, null).ToString().ToLower() == searchTermList[i].ToLower())
                             {
-                                vehicles.Add(vehicle);
-                                parkingSlot.Add(i);
+                                correct++;
                             }
+                        }
+                        else if (vehicle.ToString().ToLower() == searchPropList[i].ToLower())
+                        {
+                            correct++;
+                            break;
                         }
                     }
                 }
+                if (correct == searchPropList.Count)
+                {
+                    vehicles.Add(vehicle);
+                }
             }
-            return (parkingSlot, vehicles);
-        }
 
+            return vehicles;
+        }
     }
 }
